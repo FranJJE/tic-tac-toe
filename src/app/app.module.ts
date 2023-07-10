@@ -11,6 +11,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 //toaster
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { DxCheckBoxModule, DxListModule, DxSelectBoxModule, DxTemplateModule, DxTreeViewModule } from 'devextreme-angular';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,11 @@ import { ToastrModule } from 'ngx-toastr';
     
   ],
   imports: [
+    DxTreeViewModule,
+    DxListModule,
+    DxTemplateModule,
+    DxCheckBoxModule,
+    DxSelectBoxModule,
     BrowserModule,
     AppRoutingModule,
     FontAwesomeModule,

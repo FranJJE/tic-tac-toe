@@ -1,94 +1,155 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { DxTreeViewComponent } from 'devextreme-angular';
 import { ToastrService } from 'ngx-toastr';
 
+export class Employee {
+  id: number;
+
+  fullName: string;
+
+  prefix: string;
+
+  position: string;
+
+  expanded?: boolean;
+
+  selected?: boolean;
+
+  items?: Employee[];
+}
+
+const employees: Employee[] = [{
+  id: 1,
+  fullName: 'John Heart',
+  prefix: 'Dr.',
+  position: 'CEO',
+  expanded: true,
+  items: [{
+    id: 2,
+    fullName: 'Samantha Bright',
+    prefix: 'Dr.',
+    position: 'COO',
+    expanded: true,
+    items: [{
+      id: 3,
+      fullName: 'Kevin Carter',
+      prefix: 'Mr.',
+      position: 'Shipping Manager',
+    }, {
+      id: 14,
+      fullName: 'Victor Norris',
+      prefix: 'Mr.',
+      selected: true,
+      position: 'Shipping Assistant',
+    }],
+  }, {
+    id: 4,
+    fullName: 'Brett Wade',
+    prefix: 'Mr.',
+    position: 'IT Manager',
+    expanded: true,
+    items: [{
+      id: 5,
+      fullName: 'Amelia Harper',
+      prefix: 'Mrs.',
+      position: 'Network Admin',
+    }, {
+      id: 6,
+      fullName: 'Wally Hobbs',
+      prefix: 'Mr.',
+      position: 'Programmer',
+    }, {
+      id: 7,
+      fullName: 'Brad Jameson',
+      prefix: 'Mr.',
+      position: 'Programmer',
+    }, {
+      id: 8,
+      fullName: 'Violet Bailey',
+      prefix: 'Ms.',
+      position: 'Jr Graphic Designer',
+    }],
+  }, {
+    id: 9,
+    fullName: 'Barb Banks',
+    prefix: 'Mrs.',
+    position: 'Support Manager',
+    expanded: true,
+    items: [{
+      id: 10,
+      fullName: 'Kelly Rodriguez',
+      prefix: 'Ms.',
+      position: 'Support Assistant',
+    }, {
+      id: 11,
+      fullName: 'James Anderson',
+      prefix: 'Mr.',
+      position: 'Support Assistant',
+    }],
+  }],
+}];
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title: string = 'tic-tac-toe';
+  @ViewChild(DxTreeViewComponent, { static: false }) treeView: DxTreeViewComponent;
 
-  winMessage: string = '';
-  isCross: boolean = false;
-  itemArray: string[] =  new Array(9).fill('empty');
+  employees: Employee[];
 
+  selectedEmployees: Employee[] = [];
 
-  constructor(private toastr: ToastrService) {
+  showCheckBoxesModes: string[] = ['normal', 'selectAll', 'none'];
 
+  showCheckBoxesMode: string = this.showCheckBoxesModes[0];
+
+  selectionModes: string[] = ['multiple', 'single'];
+
+  selectionMode: string = this.selectionModes[0];
+
+  selectNodesRecursive = true;
+
+  selectByClick = false;
+
+  isRecursiveDisabled = false;
+
+  isSelectionModeDisabled = false;
+
+  constructor() {
+    this.employees = employees;
   }
 
-  handleClick = (itemNumber: number) => {
-    if(this.winMessage) {
-      return this.toastr.success(this.winMessage)
-    }
-
-    if(this.itemArray[itemNumber] === 'empty') {
-      this.itemArray[itemNumber] = this.isCross ? 'cross' : 'circle'
-
-      this.isCross = !this.isCross
-    } else {
-      return this.toastr.info('Already filled')
-    }
-
-    this.checkIsWinner();
+  treeViewSelectionChanged(e: any) {
+    this.syncSelection(e.component);
   }
 
-  checkIsWinner = () => {
-    if (
-      this.itemArray[0] === this.itemArray[1] &&
-      this.itemArray[0] === this.itemArray[2] &&
-      this.itemArray[0] !== 'empty'
-    ) {
-      this.winMessage = `${this.itemArray[0]} won`;
-    } else if (
-      this.itemArray[3] !== 'empty' &&
-      this.itemArray[3] === this.itemArray[4] &&
-      this.itemArray[4] === this.itemArray[5]
-    ) {
-      this.winMessage = `${this.itemArray[3]} won`;
-    } else if (
-      this.itemArray[6] !== 'empty' &&
-      this.itemArray[6] === this.itemArray[7] &&
-      this.itemArray[7] === this.itemArray[8]
-    ) {
-      this.winMessage = `${this.itemArray[6]} won`;
-    } else if (
-      this.itemArray[0] !== 'empty' &&
-      this.itemArray[0] === this.itemArray[3] &&
-      this.itemArray[3] === this.itemArray[6]
-    ) {
-      this.winMessage = `${this.itemArray[0]} won`;
-    } else if (
-      this.itemArray[1] !== 'empty' &&
-      this.itemArray[1] === this.itemArray[4] &&
-      this.itemArray[4] === this.itemArray[7]
-    ) {
-      this.winMessage = `${this.itemArray[1]} won`;
-    } else if (
-      this.itemArray[2] !== 'empty' &&
-      this.itemArray[2] === this.itemArray[5] &&
-      this.itemArray[5] === this.itemArray[8]
-    ) {
-      this.winMessage = `${this.itemArray[2]} won`;
-    } else if (
-      this.itemArray[0] !== 'empty' &&
-      this.itemArray[0] === this.itemArray[4] &&
-      this.itemArray[4] === this.itemArray[8]
-    ) {
-      this.winMessage = `${this.itemArray[0]} won`;
-    } else if (
-      this.itemArray[2] !== 'empty' &&
-      this.itemArray[2] === this.itemArray[4] &&
-      this.itemArray[4] === this.itemArray[6]
-    ) {
-      this.winMessage = `${this.itemArray[2]} won`;
-    }
-  };
+  treeViewContentReady(e: any) {
+    this.syncSelection(e.component);
+  }
 
-  reloadGame = () => {
-    this.winMessage = '';
-    this.isCross = false;
-    this.itemArray =  new Array(9).fill('empty');
+  syncSelection(treeView: any) {
+    const selectedEmployees = treeView.getSelectedNodes()
+      .map((node: any) => node.itemData);
+
+    this.selectedEmployees = selectedEmployees;
+  }
+
+  showCheckBoxesModeValueChanged(e: any) {
+    this.showCheckBoxesMode = e.value;
+    this.isSelectionModeDisabled = e.value === 'selectAll';
+    if (e.value === 'selectAll') {
+      this.selectionMode = 'multiple';
+      this.isRecursiveDisabled = false;
+    }
+  }
+
+  selectionModeValueChanged(e: any) {
+    this.selectionMode = e.value;
+    this.isRecursiveDisabled = e.value === 'single';
+    if (e.value === 'single') {
+      this.selectNodesRecursive = false;
+      this.treeView.instance.unselectAll();
+    }
   }
 }
